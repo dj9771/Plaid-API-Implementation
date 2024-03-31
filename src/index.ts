@@ -9,8 +9,8 @@ const configuration = new Configuration({
     basePath: PlaidEnvironments.sandbox, 
     baseOptions: {
         headers: {
-        'PLAID-CLIENT-ID': '660454e141d17b001c95d558', 
-        'PLAID-SECRET': '24f497e18747f1ca671056ac2fe51c',
+        'PLAID-CLIENT-ID': 'YOUR-CLIENT-ID', 
+        'PLAID-SECRET': 'YOUR-SECRET',
         }, 
     },
 });
