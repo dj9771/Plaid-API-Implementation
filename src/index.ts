@@ -20,10 +20,6 @@ const db = admin.firestore();
 
 /**
  * Creates new public tokens for a set of predefined institution IDs and clears any existing tokens from the Firestore.
- * This function is designed to be triggered via an HTTP request.
- *
- * @param {functions.https.Request} req - The HTTP request object.
- * @param {functions.https.Response} res - The HTTP response object.
  */
 exports.createPublicTokens = functions.https.onRequest(async (req, res) => {
     
@@ -40,9 +36,10 @@ exports.createPublicTokens = functions.https.onRequest(async (req, res) => {
             batch.delete(doc.ref); // Add each document to the batch delete 
         });
         
-        await batch.commit(); // Execute the batch delete
+        // delete old tokens
+        await batch.commit(); 
         
-        // Create a token each for the three institutions
+        // Step 2: Create a token each for the three institutions
         for (const institutionId of institutionIds) {
             const response = await client.sandboxPublicTokenCreate({
                 institution_id: institutionId,
@@ -63,10 +60,6 @@ exports.createPublicTokens = functions.https.onRequest(async (req, res) => {
     
 /**
  * Exchanges public tokens for access tokens and updates the Firestore `accessTokens` collection.
- * This function is intended to be triggered via an HTTP request.
- *
- * @param req - The HTTP request object.
- * @param res - The HTTP response object.
  */
 exports.exchangePublicTokensAndStore = functions.https.onRequest(async (req, res) => { 
     try {
@@ -87,7 +80,7 @@ exports.exchangePublicTokensAndStore = functions.https.onRequest(async (req, res
             batchDelete.delete(doc.ref); // Queue each document for deletion 
         });
         
-        // Execute the batch deletion
+        // delete old tokens
         await batchDelete.commit();
         
         // Step 3: Exchange each public token for an access token and store them 
@@ -115,9 +108,6 @@ exports.exchangePublicTokensAndStore = functions.https.onRequest(async (req, res
  * Fetches transactions within a specified date range for each access token stored in Firestore,
  * then stores these transactions in the Firestore `transactions` collection.
  * This function is triggered via an HTTP POST request.
- * 
- * @param {functions.https.Request} req - The HTTP request object, containing the start and end dates.
- * @param {functions.https.Response} res - The HTTP response object used to send responses back to the client.
  */
 
 exports.getTransactions = functions.https.onRequest(async (req, res) => { 
@@ -175,9 +165,6 @@ exports.getTransactions = functions.https.onRequest(async (req, res) => {
 /**
  * Calculates the total expenditure per category from transactions stored in Firestore and estimates
  * monthly budgets by dividing the totals by a predefined number.
- *
- * @param req - The HTTP request object.
- * @param res - The HTTP response object used to send responses back to the client.
  */
 
 exports.calculateMonthlyBudget = functions.https.onRequest(async (req, res) => {
@@ -211,12 +198,12 @@ exports.calculateMonthlyBudget = functions.https.onRequest(async (req, res) => {
         // totalsByCategory[category].count++; 
     });
 
-        // Calculate average monthly budget per category
+        // Step 3: Calculate average monthly budget per category
         const monthlyBudgets: { [category: string]: number } = {}; 
         for (const category in totalsByCategory) {
             const { total } = totalsByCategory[category];
             monthlyBudgets[category] = total / 2; 
-            // can be modified for user's input
+            // can be modified per user's input
             // currently transaction test data provided are all in the range 20240101-20240229
         }
         
