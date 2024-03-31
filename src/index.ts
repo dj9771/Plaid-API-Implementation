@@ -109,7 +109,6 @@ exports.exchangePublicTokensAndStore = functions.https.onRequest(async (req, res
  * then stores these transactions in the Firestore `transactions` collection.
  * This function is triggered via an HTTP POST request.
  */
-
 exports.getTransactions = functions.https.onRequest(async (req, res) => { 
     try {
         const startDate: string = req.body.start_date; 
@@ -166,7 +165,6 @@ exports.getTransactions = functions.https.onRequest(async (req, res) => {
  * Calculates the total expenditure per category from transactions stored in Firestore and estimates
  * monthly budgets by dividing the totals by a predefined number.
  */
-
 exports.calculateMonthlyBudget = functions.https.onRequest(async (req, res) => {
      try {
         // Step 1: Fetch the transaction from database
